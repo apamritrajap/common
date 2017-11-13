@@ -1,0 +1,114 @@
+<script>
+// Code to get duration of audio /video file before upload - from: http://coursesweb.net/
+
+//register canplaythrough event to #audio element to can get duration
+var f_duration =0;  //store duration
+document.getElementById('audio').addEventListener('canplaythrough', function(e){
+  //add duration in the input field #f_du
+  f_duration = Math.round(e.currentTarget.duration);
+  document.getElementById('duration').value = f_duration;
+  URL.revokeObjectURL(obUrl);
+});
+
+//when select a file, create an ObjectURL with the file and add it in the #audio element
+var obUrl;
+document.getElementById('upload').addEventListener('change', function(e){
+  var file = e.currentTarget.files[0];
+  //check file extension for audio/video type
+  if(file.name.match(/\.(avi|mp3|mp4|mpeg|ogg)$/i)){
+    obUrl = URL.createObjectURL(file);
+    document.getElementById('audio').setAttribute('src', obUrl);
+  }
+});
+</script>
+ <!-- router pth for ajax or any hting in cake -->
+<?php echo Router::url(array('controller' => 'uploads', 'action' => 'add')); ?>
+<!-- file properties using ajax jquery -->
+<script>$(document).ready(function(){alert('hi');
+$("#load").on('change', function(){
+		var formData = new FormData();
+		formData.append('file', $('#load')[0].files[0]);
+
+		$.ajax({
+				method: "POST", 
+				url:"<?php echo Router::url(array('controller' => 'uploads', 'action' => 'add')); ?>",
+				data:formData,
+			
+                cache: false,
+                contentType: false,// this mand.
+                processData: false //same
+			})
+			.done(function(data){
+				alert(data);
+				});
+
+	});
+});
+</script>
+<!-- Datepicker   make any input of id or class ex-- class="datepicker"-->
+
+<script>
+	  $( function() {
+		$( ".datepicker" ).datepicker();
+	  });
+		$.datepicker.setDefaults({
+			minDate:-7,
+			maxDate:0
+		});
+</script>
+<script>
+//checkbox check uncheck	
+	//alert('hi');
+	$("#franzosisch_input").change(function() {
+		if(this.checked) {$('#franzosisch_input_1').prop('checked', true);}
+		else{$('#franzosisch_input_1').prop('checked', false);}
+	});
+</script>
+
+<script>
+//check all and uncheck all on 1 checkbox
+$(document).ready(function() {
+    $('#selectall').on('click',function(){
+        if(this.checked){
+            $('.case').each(function(){
+                this.checked = true;
+            });
+        }else{
+             $('.case').each(function(){
+                this.checked = false;
+            });
+        }
+    });
+    
+    $('.case').on('click',function(){
+        if($('.case:checked').length == $('.case').length){
+            $('#selectall').prop('checked',true);
+        }else{
+            $('#selectall').prop('checked',false);
+        }
+    });
+});	
+</script>
+<script>
+//get value class checked
+	$("#send_mail").click(function() {
+	    var chkArray = [];
+		
+		/* look for all checkboes that have a class 'case' attached to it and check if it was checked */
+		$(".case:checked").each(function() {
+			chkArray.push($(this).val());
+		});
+		
+		/* we join the array separated by the comma */
+		var selected;
+		selected = chkArray.join(',') ;
+		
+		/* check if there is selected checkboxes, by default the length is 1 as it contains one single comma */
+		if(selected.length > 1){
+			alert("You have selected " + selected);	
+		}else{
+			alert("Please at least one of the checkbox");	
+		}
+	});
+</script>
+

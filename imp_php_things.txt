@@ -1,0 +1,258 @@
+<?php
+//unique name for file when upload good func,....
+	$any = time().uniqid(rand());
+
+/**
+ * add method
+ *	db file save duration part ajax save
+ * @return void
+ */
+	public function add() {
+		if($this->request->is('post')){
+			$this->autoRender = false;
+			App::import('Vendor', 'duration');
+			$file = $_FILES['Upload'];
+			$name = $file['name'];
+			$tmp_name = $file['tmp_name'];
+			
+	//audio duration		
+			$mp3file = new MP3File($tmp_name);
+			//$duration1 = $mp3file->getDurationEstimate($mp3file);
+			$duration = $mp3file->getDuration($mp3file);
+			$duration1 = MP3File::formatTime($duration);
+			$split_duration = explode(':', $duration1);
+			$in_dollars = ($duration/100);
+			//pr($_FILES);die;
+	// size in mb
+			$size = $file['size'];
+            $byte = 0.000001;
+			$size_mb = round(($size * $byte).' MB',2);
+	// db work		
+			$file_db = str_replace(" ", "-", rand(1, 3000) . $name);
+			$this->request->data['Upload']['file_name'] = $file_db;
+			$this->request->data['Upload']['file_type'] = $file['type'];
+			$this->request->data['Upload']['file_size'] = $size;
+			$this->request->data['Upload']['file_duration'] = $duration;
+			//pr($this->request->data);
+			$this->Upload->create();
+			if($this->Upload->save($this->request->data)) {
+				move_uploaded_file($tmp_name , WWW_ROOT . 'files'.DS.'audio'.DS . $file_db);
+				}
+			 echo $html = json_encode(array($name, $size_mb, $duration1, $in_dollars));
+      
+		}
+	}
+//date format m,d,y with month name
+
+			$date =  $data['created'];
+			$str_date = strtotime($date);
+			$new_date = date("F d, Y", $chk);
+			echo $new_date; 
+// move multiple files
+if(isset($_FILES['file_array'])){
+    $name_array = $_FILES['file_array']['name'];
+    $tmp_name_array = $_FILES['file_array']['tmp_name'];
+    $type_array = $_FILES['file_array']['type'];
+    $size_array = $_FILES['file_array']['size'];
+    $error_array = $_FILES['file_array']['error'];
+    for($i = 0; $i < count($tmp_name_array); $i++){
+        if(move_uploaded_file($tmp_name_array[$i], "test_uploads/".$name_array[$i])){
+            echo $name_array[$i]." upload is complete<br>";
+        } else {
+            echo "move_uploaded_file function failed for ".$name_array[$i]."<br>";
+        }
+    }
+}	
+// @@@@@@@@@ file upload in name array multiple input
+if(isset($_FILES['attachments'])){
+							$attachments = array();
+							$attachments = $_FILES['attachments'];
+						}else {
+							$attachments = '';
+						}											
+
+if(!empty($attachments)){
+				$name_img = $attachments['name'];
+				$tmp_name_img = $attachments['tmp_name'];
+				//$type_img = $image['type'];
+				//$size_img = $image['size'];
+				$error_img = $attachments['error'];
+				}
+				
+					$name_img[0] = time().uniqid(rand()).'.'.$name_img[0];
+					$name_img[1] = time().uniqid(rand()).'.'.$name_img[1];
+					$name_img[2] = time().uniqid(rand()).'.'.$name_img[2];
+					$name_img[3] = time().uniqid(rand()).'.'.$name_img[3];
+					$name_img[4] = time().uniqid(rand()).'.'.$name_img[4];
+					
+				
+				for($i = 0; $i < count($tmp_name_img); $i++){
+					move_uploaded_file($tmp_name_img[$i], "../uploads/attachment/".$name_img[$i]);
+				}
+//########## csv download @@@@@@@@@@@@@
+
+function exportFunction() {
+		$filename = "fileName.csv";
+		$results = YOUR_DATABASE_QUERY_RESULT;
+       
+        $pageURL = "http";
+        if (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == "on") {$pageURL .= "s";}
+        $pageURL .= "://";
+        if ($_SERVER["SERVER_PORT"] != "80")
+        {
+            $pageURL .= $_SERVER["SERVER_NAME"].":".$_SERVER["SERVER_PORT"];
+        } else {
+            $pageURL .= $_SERVER["SERVER_NAME"];
+        }
+      
+        $csv_file = fopen('php://output', 'w');
+ 
+        header('Content-type: application/csv');
+        header('Content-Disposition: attachment; filename="'.$filename.'"');
+ 
+        $header_row = array("Rank", "Name", "Business Name");
+ 
+        fputcsv($csv_file,$header_row,',','"');
+		$rank = 1;
+		
+        foreach($results AS $result) {
+			    $row = array(
+				$result['value1'],
+                $result['value2'],
+                $result['value3']
+			);
+			
+            fputcsv($csv_file,$row,',','"');
+			
+			$rank = $rank+1;
+        }
+
+        fclose($csv_file);
+        return false;
+    }
+// @@@@@@@@ image preview with new window link ########
+
+<div class="well">
+<h4>Vendor Agreement</h4>
+<a href="../uploads/attachment/<?php echo $attachView['vendor_agreement']; ?>" onclick="window.open (this.href, 'child'); return false">
+	<img src= "../uploads/attachment/<?php echo $attachView['vendor_agreement']; ?>" style="height:150px;width:250px;">
+</a>
+</div>	
+
+
+// @@@@@@@@ pdf preview with new window link ########
+
+<div class="well">
+<h4>Application</h4>
+<p>Last updated application pdf file is:
+
+$path = $attachView['application_attach'];
+$explode =  explode(".", $path);
+echo $explode[1].'.'.$explode[2];
+
+</p>
+<a href='../uploads/attachment/<?php echo $attachView['application_attach']; ?>' onclick="window.open (this.href, 'child'); return false">click here to view</a>
+</div>
+
+//@@@@@@@@@ csv @@@@@@@@@@@@@@@
+
+#****************************************************************************************
+
+	#Function Name: 	vendorListCsv()
+
+	#Date:				july 13,2017
+
+	#Input Parameters:	
+
+	#Purpose:			To download csv file of vendors table
+
+	#****************************************************************************************
+	public function vendorListCsv()
+	{
+		$filename = "vendorList.csv";
+		$query =  "select vendors.* from vendors";
+		$find = mysqli_query($this->db_link,$query);
+		$data = [];
+		while($results = mysqli_fetch_assoc($find)){
+				if($results['status']== 1){
+					$results['status'] = 'Active';
+				}else{
+					$results['Inactive'];
+				}
+				$data[] = $results;
+		}
+		//echo "<pre>";print_r($data);die;
+        $pageURL = "http";
+        if (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == "on") {$pageURL .= "s";}
+        $pageURL .= "://";
+        if ($_SERVER["SERVER_PORT"] != "80")
+        {
+            $pageURL .= $_SERVER["SERVER_NAME"].":".$_SERVER["SERVER_PORT"];
+        } else {
+            $pageURL .= $_SERVER["SERVER_NAME"];
+        }
+      
+        $csv_file = fopen('php://output', 'w');
+ 
+        header('Content-type: application/csv');ob_end_clean();
+        header('Content-Disposition: attachment; filename="'.$filename.'"');
+ 
+        $header_row = array('Vendor First Name','Vendor Last Name',  'Company Name','Vendor Address','Contact number #1','Contact number #2','Contact number #3','Vendor Type','Email','Vendor User Id','Internal Notes','service_area','Status');
+ 
+        fputcsv($csv_file,$header_row,',','"');
+		$rank = 1;
+		
+        foreach($data AS $result => $value) {
+			$row = array();
+			$row[] = $value['first_name'];
+			$row[] = $value['last_name'];
+			$row[] = $value['first_name'];
+			$row[] = $value['vendor_add'];
+			$row[] = $value['phone_no_1'];
+			$row[] = $value['phone_no_2'];
+			$row[] = $value['phone_no_3'];
+			$row[] = $value['vendor_type'];
+			$row[] = $value['email'];
+			$row[] = $value['vendor_user_id'];
+			$row[] = $value['internal_notes'];
+			$row[] = $value['service_area'];
+			$row[] = $value['status'];
+			
+            fputcsv($csv_file,$row,',','"');
+			
+			$rank = $rank+1;
+        }
+
+        fclose($csv_file);
+        return false;
+	}
+	//image filr upload check extension_loaded
+	<?php
+   if(isset($_FILES['image'])){
+      $errors= array();
+      $file_name = $_FILES['image']['name'];
+      $file_size =$_FILES['image']['size'];
+      $file_tmp =$_FILES['image']['tmp_name'];
+      $file_type=$_FILES['image']['type'];
+      $file_ext=strtolower(end(explode('.',$_FILES['image']['name'])));
+      
+      $expensions= array("jpeg","jpg","png");
+      
+      if(in_array($file_ext,$expensions)=== false){
+         $errors[]="extension not allowed, please choose a JPEG or PNG file.";
+      }
+      
+      if($file_size > 2097152){
+         $errors[]='File size must be excately 2 MB';
+      }
+      
+      if(empty($errors)==true){
+         move_uploaded_file($file_tmp,"images/".$file_name);
+         echo "Success";
+      }else{
+         print_r($errors);
+      }
+   }
+?>
+
+?>	

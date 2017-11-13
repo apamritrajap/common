@@ -1,0 +1,137 @@
+
+<?php
+//for date conv excel
+$var = date($format, PHPExcel_Shared_Date::ExcelToPHP($InvDate));
+
+<!-- @@@@@@@simple progress bar  -->
+<div class="form-group">
+	<div class="progress">
+			<div class="progress-bar progress-bar-success myprogress" role="progressbar" style="width:0%">0%</div>
+	</div>
+	<div class="msg"></div>
+</div>
+<!-- js code for bar -->
+<script>
+		// place in ajax
+	xhr: function () {
+		var xhr = new window.XMLHttpRequest();
+		xhr.upload.addEventListener("progress", function (evt) {
+			if (evt.lengthComputable) {
+				var percentComplete = evt.loaded / evt.total;
+				percentComplete = parseInt(percentComplete * 100);
+				$('.myprogress').text(percentComplete + '%');
+				$('.myprogress').css('width', percentComplete + '%');
+			}
+		}, false);
+		return xhr;
+	}
+</script>
+<!-- @end@ -->
+
+<!-- append prepend input file data after saving in db -->
+<script>
+$(document).ready(function(){//alert('hi');
+	$("#load").on('change', function(){
+		$('.progress,.msg').show();
+		var formData = new FormData();
+		formData.append('Upload', $('#load')[0].files[0]);
+				
+		$.ajax({
+				method: "POST", 
+				url:"<?php echo Router::url(array('controller' => 'uploads', 'action' => 'add')); ?>",
+				data:formData,
+			    contentType: false,
+                processData: false,
+				xhr: function () {
+					var xhr = new window.XMLHttpRequest();
+					xhr.upload.addEventListener("progress", function (evt) {
+						if (evt.lengthComputable) {
+							var percentComplete = evt.loaded / evt.total;
+							percentComplete = parseInt(percentComplete * 100);
+							$('.myprogress').text(percentComplete + '%');
+							$('.myprogress').css('width', percentComplete + '%');
+						}
+					}, false);
+					return xhr;
+				}
+			})
+			.done(function(data){
+				//alert(data);
+				var result = $.parseJSON(data);//alert(result);
+				var check = "<input type='checkbox' name='cbox' class='timestamp'>"
+				//$('.msg').html(data);
+				 $("#append").prepend('<tr><td>'+result[0]+'</td><td>'+result[1]+' mb'+'</td><td>'+result[2]+'</td><td>'+check+'<span>+$(0.25/file)</span>'+'</td><td class='+'sum_values'+'>'+result[3]+'</td></tr>');
+	// sum	
+				var sum = 0;
+				$(".sum_values").each(function() {
+					var value = $(this).text();
+					// add only if the value is number
+					if(!isNaN(value) && value.length != 0) {	
+						sum += parseFloat(value);
+					}
+				});
+		//order total		
+				$('#ordertotal').text(sum.toFixed(2));
+		// check sum
+				$('.timestamp').change(function() {
+						if (this.checked) {
+						//alert('checked');
+						sum += 0.25;//alert(sum);
+						$('#ordertotal').text(sum.toFixed(2));
+		// total cost td				
+						var cost_change_td =parseFloat($(this).closest('td').next('td').text());
+						
+						var cost_add = cost_change_td += 0.25;
+						$(this).closest('td').next('td').text(cost_add);
+						
+					} 
+					if ((this.checked) == false ) {
+						sum -= 0.25;
+						$('#ordertotal').text(sum.toFixed(2));
+						cost_change_td -= 0.25;
+						var cost_change_td =parseFloat($(this).closest('td').next('td').text());
+						var cost_add = cost_change_td -= 0.25;
+						$(this).closest('td').next('td').text(cost_change_td);
+					} 
+				});
+				
+			});
+	});
+});
+</script>
+//@@@@@@@@@@@ curl @@@@@@@@@@//
+
+//pr($final_url);die;
+		$ch = curl_init(); 
+		curl_setopt($ch, CURLOPT_URL, $final_url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
+		curl_setopt($ch, CURLOPT_HEADER, false); 
+		$output = curl_exec($ch);//pr($output);die;
+		if (curl_errno ( $ch )) {
+			echo curl_error ( $ch );
+			curl_close ( $ch );
+			exit ();
+		}
+		curl_close($ch);
+		return json_decode($output);
+//curl pem file needed	on certificate error	
+
+/// download csv code
+	 header('Content-Type: text/csv; charset=utf-8');  
+		  header('Content-Disposition: attachment; filename=data.csv');  
+		  $output = fopen("php://output", "w");  
+		  
+		  fputcsv($output, array('ID','Vendor Id', 'Property Id', 'Address', 'Start Date','End Date','Monthly rent','Notes','Created Date','Modified Date','Vendor name'));  
+		  
+		  $query =  "select properties.*,vendors.name from properties,vendors where vendors.id = properties.vendor_id";//echo "<pre>";print_r($query);die;
+		  
+		  $result = mysqli_query($this->db_link, $query);  
+		  
+		  while($row = mysqli_fetch_assoc($result))  
+			{  
+			   fputcsv($output, $row);  
+			}  
+			fclose($output); 
+			
+// @@@@@    @@@@@@
+	
