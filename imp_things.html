@@ -117,4 +117,30 @@ $("#checkAll").change(function () {
     $("input:checkbox").prop('checked', $(this).prop("checked"));
 });
 </script>
+//check duplicate entery in text fields 
+<script>
+	function findDuplicates() {
+    var isDuplicate = false;
+    jQuery("input[name^='access_keys']").each(function (i,el1) {
+        var current_val = jQuery(el1).val();
+        if (current_val != "") {
+            jQuery("input[name^='access_keys']").each(function (i,el2) {
+                if (jQuery(el2).val() == current_val && jQuery(el1).attr("name") != jQuery(el2).attr("name")) {
+                    isDuplicate = true;
+                    jQuery(el2).css("background-color", "yellow");
+                    jQuery(el1).css("background-color", "yellow");
+                    return;
+                }
+            });
+        }
+    });
+
+    if (isDuplicate) {
+        alert ("Duplicate values found.");
+        return false;
+    } else {
+        return true;
+    }
+}
+</script>	
 
